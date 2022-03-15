@@ -1,0 +1,40 @@
+{% extends 'bootstrap/base.html' %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block styles %}
+{{ super() }}
+	<style>
+		body { background: #e8f1f9; }
+	</style>
+{% endblock %}
+
+
+{% block title %}
+Temporal Apriori Algorithm
+{% endblock %}
+
+
+{% block content %}
+
+<!-- Creo un container-->
+<div class="container">
+  <div class="row">
+    <div class="col-md-10 col-lg-8 mx-lg-auto mx-md-auto">
+
+      <h1 class="pt-5 pb-2">Simple web page to handle Temporal Apriori Algorithm!</h1>
+
+      <p class="lead">This is a Flask app using Bootstrap and WTForms. </p>
+      
+      <!-- Generiamo il modulo form in html quello creato in actor.py line 41-->
+      <p>Seleziona utente</p>
+      {{ wtf.quick_form(form) }}
+
+      <p class="pt-5" style="color:red;">{{ message }}</p>
+
+      
+
+    </div>
+  </div>
+</div>
+  
+{% endblock %}
