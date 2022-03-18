@@ -1,16 +1,9 @@
 <!-- Questa è una classe figlia, Everything before it is printed out normally-->
-{% extends 'bootstrap/base.html' %}
-
-{% block styles %}
-{{ super() }}
-	<style>
-		body { background: #e8f1f9; }
-	</style>
-{% endblock %}
+{% extends 'base.html' %}
 
 
 {% block title %}
-Exec TAA 
+ Exec LAA 
 {% endblock %}
 
 
@@ -20,19 +13,21 @@ Exec TAA
   <div class="row">
     <div class="col-sm">
 
-      <!-- note, the id is not used in the template -->
+      <br/>
+      <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <strong>Completed!</strong> Algorithm has generated <strong>{{len_rules}}</strong> rules
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
 
-      <u><h1 class="pt-5 pb-2">Temporal Apriori Algorithm</h1></u>
-
-        <a href="{{ url_for('index') }}">
-          <input class="btn btn-primary" type="button" value="Return to algorithm" style="margin-top:25px;">
-        </a>
     </div>
   </div>
 
+  <br/>
   <div class="row">
     <div class="col-sm">
-        <p class="font-weight-bold" style="margin-top:50px;">Valori settati: </p> 
+        <p class="font-weight-bold">Setting values: </p> 
         <p>Sleep value: {{sleep_value}} , 
         temporal_window: {{temporal_window}} ,
         min_support: {{min_support}} ,
@@ -41,32 +36,54 @@ Exec TAA
     </div>
   </div>
 
+  <style>
+    .tableFixHead {
+      overflow-y: auto;
+      height: 300px;
+    }
+    .tableFixHead thead th {
+      position: sticky;
+      top: 0;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+    }
+    th,
+    td {
+      padding: 8px 16px;
+      border: 1px solid #ccc;
+    }
+    th {
+      background: #eee;
+    }
+  </style>
   <div class="row">
     <div class="col-sm">
-        <p class="font-weight-bold" style="margin-top:30px;">Total rules generated: {{len_rules}}</p> 
-    </div>
-  </div>
-
-  <div class="row">
-    <div class="col-sm" >
-      <table class="table table-bordered" style="margin-top:50px;">
+    <div class="tableFixHead table table-hover" >
+      <table class="table">
         <caption>Rules generated</caption>
-        <thead class="thead-dark">
+        <thead class="thead-light">
+          <tr>
+          <th scope="col">#</th>
           <th scope="col">Rule</th>
           <th scope="col">Confidence</th>
           <th scope="col">Support</th>
+        </tr>
         </thead>
-        {%for element in rules%}
+        {%for i in range(20)%}
         <tbody>
           <tr>
-            <th>{{element.rule}}</th>
-            <th>{{element.confidence}}</th>
-            <th>{{element.support}}</th>
+            <td>{{i}}</td>
+            <td>{{rules[i].rule}}</td>
+            <td>{{rules[i].confidence}}</td>
+            <td>{{rules[i].support}}</td>
           </tr>
         </tbody>
       {%endfor%}
-      </table>
+    </table>
     </div>
+  </div>
   </div>
 
  
