@@ -10,4 +10,8 @@ static folder --> some css
 templates folder --> html pages
 
 
+
+
+
+
 Notes: actor.py & alg_cleaned.py are old pages. 
