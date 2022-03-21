@@ -4,7 +4,7 @@ from mlxtend.frequent_patterns import apriori
 from mlxtend.preprocessing import TransactionEncoder
 import pandas as pd
 from copy import copy
-from operator import itemgetter
+import utilities
 
 class TemporalEvent:
     #A temporal event is identified by a name and a location in time from t0 to t-n.
@@ -200,6 +200,8 @@ def run(path,sleep_value, temporal_window=2, min_support=0.02, min_confidence=0)
  
  rules = wrapper_function(dataset, sleep_value, temporal_window, min_support, min_confidence)
  print(len(rules))
- print(type(rules))
- rules.sort(key=itemgetter('support'), reverse=True)
- return rules,len(rules) #restituisco le prime 20 regole
+
+ #sort rules
+ rules=utilities.rulesSorting(rules,temporal_window)
+
+ return rules,len(rules) 

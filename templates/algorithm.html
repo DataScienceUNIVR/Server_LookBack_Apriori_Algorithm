@@ -69,6 +69,8 @@
           <th scope="col">Rule</th>
           <th scope="col">Confidence</th>
           <th scope="col">Support</th>
+          <th scope="col">Completeness</th>
+          <th scope="col">Size</th>
         </tr>
         </thead>
         {%for i in range(20)%}
@@ -78,6 +80,8 @@
             <td>{{rules[i].rule}}</td>
             <td>{{rules[i].confidence}}</td>
             <td>{{rules[i].support}}</td>
+            <td>{{rules[i].completeness}}</td>
+            <td>{{rules[i].size}}</td>
           </tr>
         </tbody>
       {%endfor%}
