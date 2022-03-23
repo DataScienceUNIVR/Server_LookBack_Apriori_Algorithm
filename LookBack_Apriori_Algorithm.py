@@ -158,7 +158,7 @@ def get_latex_from_rule(rule):
 def run(path,sleep_value, temporal_window=2, min_support=0.02, min_confidence=0):
  light_activity_df = pd.read_json(path+'/lightly_active_minutes.json')
  moderate_activity_df = pd.read_json(path+'/moderately_active_minutes.json')
- heavy_activity_df = pd.read_json(path+'/very_active_minutes.json')  #problema assurdo qui
+ heavy_activity_df = pd.read_json(path+'/very_active_minutes.json')  
  rest_df = pd.read_json(path+'/sedentary_minutes.json')
  sleep_quality_df = pd.read_json(path+'/sleep.json')
  sleep_quality_df = sleep_quality_df[['dateOfSleep', 'efficiency']]
@@ -199,8 +199,6 @@ def run(path,sleep_value, temporal_window=2, min_support=0.02, min_confidence=0)
  """#EXPERIMENTS"""
  
  rules = wrapper_function(dataset, sleep_value, temporal_window, min_support, min_confidence)
- print(len(rules))
-
  #sort rules
  rules=utilities.rulesSorting(rules,temporal_window)
 

@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+
+{% block cssLink %}
+<link rel="stylesheet" href="static/SubmitButton.css">
+{% endblock %}
+
+{% block title %}
+Match Query
+{% endblock %}
+
+{% block matchQueryForm %}
+<li class="nav-item active">
+    <a class="nav-link" href="{{ url_for('matchQueryForm') }} ">Match Query</a><span class="sr-only">(current)</span></a>
+</li>
+{% endblock %}
+
+
+{% block content %}
+<div class="container">
+    <div class="row">
+      <div class="col-md-10 col-lg-8 mx-lg-auto mx-md-auto">
+        <h1 class="pt-5 pb-2">Rule matching!</h1>
+        <p class="lead">Complete this form in order to find a appriopriate reccomended rule. </p>
+        
+        {% if message %}
+          <div class="alert alert-warning alert-dismissible fade show" role="alert">
+            <strong>Att!</strong> {{message}}
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+        {% endif %}
+
+        <div class="alert alert-info" role="alert">
+          <strong>Please, pay attention!</strong>
+        </br>
+          Activity allowed: HA, MA, LA, R, ZL (Hard Activity, Moderate Activity, Less Activity, Rest, Sleep)
+        </br>
+          Intensity allowed: 3, 2, 1 (A lot of time, Some time, Little time)
+        </br>
+          This is a correct rule: <strong>LA_2_t3 + MA_1_t2 + HA_2_t2 + R_3_t1</strong>
+        </div>
+
+        <form action="{{ url_for('matchingQuery') }} " method="POST">
+             <div class="form-row">
+              <label>Temporal Window</label>
+               <input type="number" class="form-control" name="temporal_window" value={{temporal_window}} placeholder={{temporal_window}} disabled> 
+              </div>
+              <br/>
+             {% if temporal_window >=3 %}
+             <div class="form-row">
+              <input type="text" class="form-control" name="activity_t3" placeholder="Example: LA_2_t3 + HA_1_t3" > 
+              </div>
+             <br/>
+             {% endif %}
+
+             {% if temporal_window >=2 %}
+             <div class="form-row">
+              <input type="text" class="form-control" name="activity_t2" placeholder="Example: MA_2_t2 + R_1_t2" > 
+              </div>
+            <br/>
+             {% endif %}
+             
+             {% if temporal_window >=1 %}
+             <div class="form-row">
+              <input type="text" class="form-control" name="activity_t1" placeholder="Example: MA_2_t1 + ZL_1_t1" >
+              </div>
+            <br/>
+             {% endif %}
+             <button type="submit" class="button" onclick="this.classList.toggle('button--loading')">
+              <span class="button__text">Match Query!</span>
+          </button>
+        </form>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

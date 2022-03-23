@@ -6,6 +6,11 @@
  Exec LAA 
 {% endblock %}
 
+{% block matchQueryForm %}
+<li class="nav-item active">
+    <a class="nav-link" href="{{ url_for('matchQueryForm') }} ">Match Query</a><span class="sr-only">(current)</span></a>
+</li>
+{% endblock %}
 
 {% block content %}
 
@@ -73,8 +78,10 @@
           <th scope="col">Size</th>
         </tr>
         </thead>
+          
         {%for i in range(20)%}
         <tbody>
+          {% if i < len_rules %}  <!--Altrimenti rischio di sforare la tabella -->
           <tr>
             <td>{{i}}</td>
             <td>{{rules[i].rule}}</td>
@@ -83,6 +90,7 @@
             <td>{{rules[i].completeness}}</td>
             <td>{{rules[i].size}}</td>
           </tr>
+          {% endif %}
         </tbody>
       {%endfor%}
     </table>

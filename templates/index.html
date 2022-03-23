@@ -1,5 +1,9 @@
 {% extends 'base.html' %}
 
+{% block cssLink %}
+<link rel="stylesheet" href="static/SubmitButton.css">
+{% endblock %}
+
 {% block title %}
 LookBack Apriori Algorithm
 {% endblock %}
@@ -7,7 +11,6 @@ LookBack Apriori Algorithm
 
 {% block content %}
 
-<!-- Creo un container-->
 <div class="container">
   <div class="row">
     <div class="col-md-10 col-lg-8 mx-lg-auto mx-md-auto">
@@ -26,7 +29,7 @@ LookBack Apriori Algorithm
           </div>
           {% endif %}
           
-          <form action="/algorithm" method="POST">
+          <form action="{{ url_for('algorithm') }}" method="POST">
             <select class="form-control" aria-label="Default select example" name="data_select">
               <option selected value="null">Data available</option>
                 <option value="pm1">pm1</option>
@@ -47,7 +50,9 @@ LookBack Apriori Algorithm
            <br/>
            <div class="form-group"><input type="number" step=0.01  class="form-control" placeholder="min_confidence" name="min_confidence"></div>
            <br/>
-            <button type="submit" class="btn btn-secondary" >Run Algorithm!</button>
+            <button type="submit" class="button" onclick="this.classList.toggle('button--loading')">
+              <span class="button__text">Run Algorithm!</span>
+          </button>
           </form>
     </div>
   </div>
