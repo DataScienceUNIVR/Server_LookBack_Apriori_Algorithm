@@ -39,6 +39,8 @@ Match Query
           Intensity allowed: 3, 2, 1 (A lot of time, Some time, Little time)
         </br>
           This is a correct rule: <strong>LA_2_t3 + MA_1_t2 + HA_2_t2 + R_3_t1</strong>
+        <br/>
+        <lead>Not in all day activity is required</lead>
         </div>
 
         <form action="{{ url_for('matchingQuery') }} " method="POST">
@@ -47,29 +49,11 @@ Match Query
                <input type="number" class="form-control" name="temporal_window" value={{temporal_window}} placeholder={{temporal_window}} disabled> 
               </div>
               <br/>
-             {% if temporal_window >=3 %}
              <div class="form-row">
-              <input type="text" class="form-control" name="activity_t3" placeholder="Example: LA_2_t3 + HA_1_t3" > 
+              <input type="text" class="form-control" name="my_query" placeholder="Example: LA_2_t3 + HA_1_t2 + R_1_t1" > 
               </div>
              <br/>
-             {% endif %}
-
-             {% if temporal_window >=2 %}
-             <div class="form-row">
-              <input type="text" class="form-control" name="activity_t2" placeholder="Example: MA_2_t2 + R_1_t2" > 
-              </div>
-            <br/>
-             {% endif %}
-             
-             {% if temporal_window >=1 %}
-             <div class="form-row">
-              <input type="text" class="form-control" name="activity_t1" placeholder="Example: MA_2_t1 + ZL_1_t1" >
-              </div>
-            <br/>
-             {% endif %}
-             <button type="submit" class="button" onclick="this.classList.toggle('button--loading')">
-              <span class="button__text">Match Query!</span>
-          </button>
+             <button type="submit" class="btn btn-secondary">Match Query!</button>
         </form>
     </div>
   </div>

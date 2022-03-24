@@ -87,31 +87,20 @@ def matchingQuery():
     temporal_window,rules=utilities.__splitFile()
 
     #obtain info from form
-    if temporal_window>=1:
-        activity_t1=request.form.get('activity_t1')
-    if temporal_window>=2:
-        activity_t2=request.form.get('activity_t2')
-    if temporal_window>=3:
-        activity_t3=request.form.get('activity_t3')
-    
-    #Check if form is completed
-    if activity_t1 == "" or activity_t2 == "" or activity_t3 == "":
-        return render_template("matchQueryForm.html",message="All field required",temporal_window=temporal_window)
-    
-    #Upper case
-    activity_t3=activity_t3.upper()
-    activity_t2=activity_t2.upper()
-    activity_t1=activity_t1.upper()
+    my_query=request.form.get('my_query')
 
-    #Create query rule 
-    if temporal_window==3:
-     query=activity_t3+" + "+ activity_t2 + " + "+activity_t1
-    if temporal_window==2:
-     query=activity_t2 + " + "+activity_t1
-    if temporal_window==1:
-     query=activity_t1
-     
-    return render_template('matchingQuery.html',query=query) 
+    #Check if form is uncompleted
+    if my_query == "":
+        return render_template("matchQueryForm.html",message="Query empty",temporal_window=temporal_window)
+    if temporal_window==2 and "t3" in my_query:
+        return render_template("matchQueryForm.html",message="Temporal window is 2 so, you can't specify activity in t3",temporal_window=temporal_window)
+    if temporal_window==1 and ("t3" in my_query or "t2" in my_query):
+        return render_template("matchQueryForm.html",message="Temporal window is 1 so, you can specify activity only t1",temporal_window=temporal_window)
+
+
+    typeMatch, ruleMatch=utilities.findMatching(my_query,rules)
+
+    return render_template('matchingQuery.html',my_query=my_query, typeMatch=typeMatch, ruleMatch=ruleMatch) 
 
 # keep this as is
 if __name__ == '__main__':
