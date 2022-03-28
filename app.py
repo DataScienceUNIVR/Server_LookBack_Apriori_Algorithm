@@ -39,52 +39,59 @@ def index():
  
 @app.route('/algorithm', methods=["POST","GET"])
 def algorithm():  
-    data=request.form.get('data_select')
-    sleep_value= request.form.get("sleep_value")
-    temporal_window=request.form.get("temporal_window")
-    min_support=request.form.get("min_support")
-    min_confidence=request.form.get("min_confidence")
-
-    correct=True
+ if request.method=="POST":
+  data=request.form.get('data_select')
+  sleep_value= request.form.get("sleep_value")
+  temporal_window=request.form.get("temporal_window")
+  min_support=request.form.get("min_support")
+  min_confidence=request.form.get("min_confidence")
+ 
+  correct=True
+  
+  #check if all value are present
+  if data=="null" or not sleep_value or not temporal_window or not min_support or not min_confidence:
+   correct=False
+   message="All value required"
+  else:
+   sleep_value= int(sleep_value)
+   temporal_window=int(temporal_window)
+   min_support=float(min_support)
+   min_confidence=float(min_confidence)
+ 
+  #check range of value
+  if correct:
+   message,correct=utilities.__dataRange(sleep_value,temporal_window,min_support,min_confidence)
+  
+  if correct:
+     #extend path C:/Users/Marco Castelli/Documents/PytonWorkspace/newproject/Data/pm1
+     data='Data/'+data
+     
+     #run algorithm (sorting is included)
+     rules,len_rules=LookBack_Apriori_Algorithm.run(data,sleep_value,temporal_window,min_support,min_confidence)
     
-    #check if all value are present
-    if data=="null" or not sleep_value or not temporal_window or not min_support or not min_confidence:
-     correct=False
-     message="All value required"
-    else:
-     sleep_value= int(sleep_value)
-     temporal_window=int(temporal_window)
-     min_support=float(min_support)
-     min_confidence=float(min_confidence)
-
-    #check range of value
-    if correct:
-     message,correct=utilities.__dataRange(sleep_value,temporal_window,min_support,min_confidence)
-    
-    if correct:
-       #extend path C:/Users/Marco Castelli/Documents/PytonWorkspace/newproject/Data/pm1
-       data='Data/'+data
-       
-       #run algorithm (sorting is included)
-       rules,len_rules=LookBack_Apriori_Algorithm.run(data,sleep_value,temporal_window,min_support,min_confidence)
-      
-       #save info in a file
-       utilities.__saveSetting(temporal_window,rules,'setting.txt')
-
+     #save info in a file
+     utilities.__saveSetting(sleep_value,temporal_window,min_support,min_confidence,rules)
+ 
+     return render_template("algorithm.html", sleep_value=sleep_value,
+     temporal_window=temporal_window,min_support=min_support,min_confidence=min_confidence,
+     rules=rules,len_rules=len_rules)
+  else:
+      return render_template("index.html",message=message)
+ 
+ elif request.method=="GET":
+       temporal_window,sleep_value,min_support,min_confidence,_,rules=utilities.__splitFile()
        return render_template("algorithm.html", sleep_value=sleep_value,
        temporal_window=temporal_window,min_support=min_support,min_confidence=min_confidence,
-       rules=rules,len_rules=len_rules)
-    else:
-        return render_template("index.html",message=message)
+       rules=rules,len_rules=len(rules))
 
 @app.route('/algorithm/matchQueryForm', methods=["POST","GET"])
 def matchQueryForm():
-    temporal_window,rules=utilities.__splitFile()
+    temporal_window,_,_,_,rules,_=utilities.__splitFile()
     return render_template('matchQueryForm.html',rules=rules,temporal_window=temporal_window) 
 
 @app.route('/algorithm/matchQueryForm/matchingQuery', methods=["POST","GET"])
 def matchingQuery():
-    temporal_window,rules=utilities.__splitFile()
+    temporal_window,_,_,_,rules,_=utilities.__splitFile()
 
     #obtain info from form
     my_query=request.form.get('my_query')

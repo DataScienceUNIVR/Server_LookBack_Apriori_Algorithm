@@ -45,23 +45,45 @@ def __splitFile():
     with open('setting.txt','r') as f:
         res=f.read()
 
-    temporal_window=int(res[:res.index('\n')]) #obtain temporal_window   
+    temporal_window,sleep_value,min_support,min_confidence=list((res[:res.index('\n')]).split(','))
     rules=res[res.index('\n')+1:]  #obtain rules as one string
     rules = list(rules.split("\n")) #create a list of rules
     rules.pop() #delete last element is a \n
-    return temporal_window,rules
+ 
+    res={}
+    #List with rules with all value
+    mylistRules = list()
+    #Create a list of dictionary
+    for rule in rules:
+        a=rule[:rule.index(',')]
+        b,c,d,e=rule[rule.index(',')+1:].split(',')
+        res['rule']=a
+        res['confidence']=b
+        res['support']=c
+        res['completeness']=d
+        res['size']=e
+        mylistRules.append(res)
+        res={}
+    
+    #take only rules
+    onlyRules = [ sub['rule'] for sub in mylistRules ]
+    
+    return temporal_window,sleep_value,min_support,min_confidence,onlyRules,mylistRules
 
 #create a file_name file to save mining rules and temporal_window
-def __saveSetting(temporal_window,rules, file_name):
+def __saveSetting(sleep_value,temporal_window,min_support,min_confidence,rules):
  
  #obtain only the rule(the string)
- only_rule=(x['rule'] for x in rules)
+ #only_rule=(x['rule'] for x in rules)
        
  #save information in a file
- with open(file_name,'w') as f:
-  f.write(str(temporal_window)+'\n')
-  for e in only_rule:
-   f.write(e+'\n')
+ with open('setting.txt','w') as f:
+  f.write(str(temporal_window)+',')
+  f.write(str(sleep_value)+',')
+  f.write(str(min_support)+',')
+  f.write(str(min_confidence)+'\n')
+  for e in rules:
+   f.write(e['rule']+','+str(e['confidence'])+','+str(e['support'])+','+str(e['completeness'])+','+str(e['size'])+'\n')
 
 #from a rule return activity_t1, actvity_t2, activity_t3
 def __splitActivity(rule):

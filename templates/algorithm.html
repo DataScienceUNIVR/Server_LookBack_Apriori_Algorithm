@@ -1,4 +1,3 @@
-<!-- Questa è una classe figlia, Everything before it is printed out normally-->
 {% extends 'base.html' %}
 
 
@@ -7,6 +6,9 @@
 {% endblock %}
 
 {% block matchQueryForm %}
+<li class="nav-item active">
+  <a class="nav-link" href="{{ url_for('algorithm') }} ">Rules generated</a><span class="sr-only">(current)</span></a>
+</li>
 <li class="nav-item active">
     <a class="nav-link" href="{{ url_for('matchQueryForm') }} ">Match Query</a><span class="sr-only">(current)</span></a>
 </li>
@@ -81,7 +83,7 @@
           
         {%for i in range(20)%}
         <tbody>
-          {% if i < len_rules %}  <!--Altrimenti rischio di sforare la tabella -->
+          {% if i < len_rules %}
           <tr>
             <td>{{i}}</td>
             <td>{{rules[i].rule}}</td>
@@ -97,8 +99,5 @@
     </div>
   </div>
   </div>
-
- 
- 
 
 {% endblock %}
