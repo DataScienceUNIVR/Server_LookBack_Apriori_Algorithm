@@ -6,26 +6,58 @@ def __dataRange(sleep_value,temporal_window,min_support,min_confidence):
     correct=True
 
     if(sleep_value<1 or sleep_value> 3):
-     error= "sleep_value correct range in [1,3];\n"
-    if(temporal_window<1 or temporal_window> 3):
-     error= error+"temporal_window correct range in [1,3];\n"
+     error= "sleep_value must be in [1,3];\n"
+    if(temporal_window<1):
+     error= error+"temporal_window must be in [1,+inf];\n"
     if(min_support>1 or min_support<=0):
-     error=error+"min_support correct range in (0,1];\n"
+     error=error+"min_support must be in (0,1];\n"
     if(min_confidence<=0 or min_confidence> 1):
-     error=error+"min_confidence correct range in (0,1];\n"
+     error=error+"min_confidence must be in (0,1];\n"
     
     if(error!=""):
         correct=False
 
     return error,correct
 
+#Check is a query is valid so it has not activity in a malformed time or in a time > temporal_window
+def __isQueryValid(temporal_window,my_query):
+       
+    #delete white space
+    my_query=my_query.replace(" ","")
+    
+    if len(my_query)==0:
+        return False,"Empty query!"
+    
+    #use this because split with + has a bug
+    my_query=my_query.replace("+", ",")       
+
+    activity=my_query.split(',')
+
+    for elem in activity:
+        if "HA" not in elem and "MA" not in elem and "LA" not in elem and "R" not in elem and "ZL" not in elem:
+          return False,"Query has not valid activity!"
+        index=elem.find('t')
+        if index == -1:
+            return False,"Query malformed!"
+        else:
+            if len(elem)-1==index:
+                return False,"Query malformed!"
+            if not elem[index+1:].isdigit():
+                return False,"Activity specificy in temporal window malformed!"
+            temp=int(elem[index+1:])
+            if temp>temporal_window:
+                return False,"Query has activity in: " + str(temp) + " but the temporal_window is: " + str(temporal_window) +"!"
+
+    return True,"Query correct!"
+
+
 # sorting rules from all rules
-def rulesSorting(rules,temporal_window):
+def __rulesSorting(rules,temporal_window):
     __addCriteria(rules,temporal_window)
     rules = sorted(rules, key = itemgetter('support','completeness','size'),reverse=True)
     return rules
 
-# add two new criteria into a list
+# add two new criteria into a list, it's used to add completeness and size into all rule in rules
 def __addCriteria(rules,temporal_window):
     for rule in rules:
      priority=0
@@ -39,7 +71,7 @@ def __addCriteria(rules,temporal_window):
 
     return rules
   
-# from a file return temporal window and a list of rules
+# from a file return setting and a list of rules
 def __splitFile():
     rules=""
     with open('setting.txt','r') as f:
@@ -70,7 +102,7 @@ def __splitFile():
     
     return temporal_window,sleep_value,min_support,min_confidence,onlyRules,mylistRules
 
-#create a file_name file to save mining rules and temporal_window
+#create a file_name file to save mining rules and setting
 def __saveSetting(sleep_value,temporal_window,min_support,min_confidence,rules):
  
  #obtain only the rule(the string)
@@ -105,6 +137,14 @@ def __splitActivity(rule):
     
     return activity_t3,activity_t2,activity_t1
 
+#take the antecedent in a rule
+def __ruleAntecedent(rule):
+     #take only string before ->, so the antecedent
+    rule_antecedent=rule[:rule.index('-')]
+    #delete all white space
+    rule_antecedent=rule_antecedent.replace(" ", "")  
+    return rule_antecedent
+
 # check if two activity are similar if they have same type [HA_3_t2,MA_1_t2] and [HA_2_t2]
 def __isSimilar(activity,query_activity):
   
@@ -135,8 +175,7 @@ def __isSimilar(activity,query_activity):
 #1) First criteria: EXACT MATCH
 def __ExactMatch(my_query, rules,query_activity_t3,query_activity_t2,query_activity_t1):
  for rule in rules:
-     rule_antecedent=rule[:rule.index('-')] #take only string before ->, so the antecedent
-     rule_antecedent=rule_antecedent.replace(" ", "")       #delete all white space
+     rule_antecedent=__ruleAntecedent(rule)
      
      activity_t3,activity_t2,activity_t1=__splitActivity(rule_antecedent)
 
@@ -147,8 +186,7 @@ def __ExactMatch(my_query, rules,query_activity_t3,query_activity_t2,query_activ
 #2) Second criteria: MATCH
 def __Match(rules,query_activity_t3,query_activity_t2,query_activity_t1):
  for rule in rules:
-     rule_antecedent=rule[:rule.index('-')] #take only string before, so the antecedent->
-     rule_antecedent=rule_antecedent.replace(" ", "")       #delete all white space
+     rule_antecedent=__ruleAntecedent(rule)
 
     #Obtain activity for day in generated rules
      activity_t3,activity_t2,activity_t1=__splitActivity(rule_antecedent)
@@ -161,8 +199,7 @@ def __Match(rules,query_activity_t3,query_activity_t2,query_activity_t1):
 #3) Third criteria: PARTIAL MATCH
 def __PartialMatch(rules,query_activity_t3,query_activity_t2,query_activity_t1):
  for rule in rules:
-     rule_antecedent=rule[:rule.index('-')] #take only string before, so the antecedent->
-     rule_antecedent=rule_antecedent.replace(" ", "")       #delete all white space
+     rule_antecedent=__ruleAntecedent(rule)
 
     #Obtain activity for day in generated rules
      activity_t3,activity_t2,activity_t1=__splitActivity(rule_antecedent)
@@ -205,12 +242,17 @@ def __PartialMatch(rules,query_activity_t3,query_activity_t2,query_activity_t1):
 
 #find matching betwenn user query and all rules generated by LookBack Apriori Algorithm
 # return rule match
-def findMatching(my_query, rules):
+def __findMatching(my_query, rules,filterT0):
+ 
  #delete white space
  my_query=my_query.replace(" ","")
  
  #obtaing activity from query
  query_activity_t3,query_activity_t2,query_activity_t1=__splitActivity(my_query)
+
+ #Take only rule with t0 in antecedent
+ if filterT0=="on":
+  rules = list(filter(lambda rule: "t0" in __ruleAntecedent(rule),rules))
 
  #1) EXACT MATCH result
  message,rule=__ExactMatch(my_query, rules,query_activity_t3,query_activity_t2,query_activity_t1)

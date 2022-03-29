@@ -200,6 +200,6 @@ def run(path,sleep_value, temporal_window=2, min_support=0.02, min_confidence=0)
  
  rules = wrapper_function(dataset, sleep_value, temporal_window, min_support, min_confidence)
  #sort rules
- rules=utilities.rulesSorting(rules,temporal_window)
+ rules=utilities.__rulesSorting(rules,temporal_window)
 
  return rules,len(rules) 

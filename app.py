@@ -92,20 +92,18 @@ def matchQueryForm():
 @app.route('/algorithm/matchQueryForm/matchingQuery', methods=["POST","GET"])
 def matchingQuery():
     temporal_window,_,_,_,rules,_=utilities.__splitFile()
+    temporal_window=int(temporal_window)
 
     #obtain info from form
     my_query=request.form.get('my_query')
+    filterT0=request.form.get('filterT0')
+    
+    #Check if form is uncompleted or query is invalid
+    value,message = utilities.__isQueryValid(temporal_window,my_query)
+    if not value:
+        return render_template("matchQueryForm.html",message=message,temporal_window=temporal_window)
 
-    #Check if form is uncompleted
-    if my_query == "":
-        return render_template("matchQueryForm.html",message="Query empty",temporal_window=temporal_window)
-    if temporal_window==2 and "t3" in my_query:
-        return render_template("matchQueryForm.html",message="Temporal window is 2 so, you can't specify activity in t3",temporal_window=temporal_window)
-    if temporal_window==1 and ("t3" in my_query or "t2" in my_query):
-        return render_template("matchQueryForm.html",message="Temporal window is 1 so, you can specify activity only t1",temporal_window=temporal_window)
-
-
-    typeMatch, ruleMatch=utilities.findMatching(my_query,rules)
+    typeMatch, ruleMatch=utilities.__findMatching(my_query,rules,filterT0)
 
     return render_template('matchingQuery.html',my_query=my_query, typeMatch=typeMatch, ruleMatch=ruleMatch) 
 
