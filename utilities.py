@@ -1,3 +1,4 @@
+from argparse import Action
 from operator import itemgetter
 import re
 # function to return error message about form in index
@@ -49,7 +50,6 @@ def __isQueryValid(temporal_window,my_query):
                 return False,"Query has activity in: " + str(temp) + " but the temporal_window is: " + str(temporal_window) +"!"
 
     return True,"Query correct!"
-
 
 # sorting rules from all rules
 def __rulesSorting(rules,temporal_window):
@@ -123,19 +123,24 @@ def __splitActivity(rule):
     rule=rule.replace("+", ",")       #use this because split with + has a bug
     rule=re.split(',',rule)           #obtain a list of activity for a specific rule
     
-    activity_t3=[]
-    activity_t2=[]
-    activity_t1=[]
-
-    for activity in rule:
-        if "t3" in activity:
-            activity_t3.append(activity)
-        elif "t2" in activity:
-            activity_t2.append(activity)
-        elif "t1" in activity:
-            activity_t1.append(activity)
+    result=[]
+    indexMax=0
     
-    return activity_t3,activity_t2,activity_t1
+    #Find max temporal window with activity
+    for activity in rule:
+     if indexMax< int(activity[activity.find('t')+1:]):
+         indexMax=int(activity[activity.find('t')+1:])
+    
+    #Create empty list
+    for i in range(indexMax+1):
+        result.append([])
+    
+    #Popolate result with activity
+    for activity in rule:
+     result[int(activity[activity.find('t')+1:])].append(activity)
+    
+    #result has this form: [[], [' MA_1_t1'], [' R_3_t2 '], ['HA_1_t3 ', ' MA_1_t3 ']]
+    return result
 
 #take the antecedent in a rule
 def __ruleAntecedent(rule):
@@ -148,11 +153,20 @@ def __ruleAntecedent(rule):
 # check if two activity are similar if they have same type [HA_3_t2,MA_1_t2] and [HA_2_t2]
 def __isSimilar(activity,query_activity):
   
-  if not activity and not query_activity:
-      return True
+  #Empty rules are obviosly similar
+  if activity==[] and query_activity==[]:
+      return "Similar"
+  #But same rules are not similar because their are equal (similar only rule with same activity but different value)
+  if activity==query_activity:
+      return "Partial"
+
+  if len(activity)>len(query_activity):
+   return "False"
+
   #Delete the same
   r_query_activity=list(set(query_activity) - set(activity))
   r_activity=list(set(activity) - set(query_activity))
+  result=r_query_activity[:]
 
   for elemQuery in r_query_activity:
       deletable=True
@@ -164,78 +178,109 @@ def __isSimilar(activity,query_activity):
          "ZL" in elemActivity and "ZL" in elemQuery):
           deletable=False
       if(deletable):
-        r_query_activity.remove(elemQuery) 
+        result.remove(elemQuery) 
  
-  #Something in common
-  if len(r_query_activity)>0:
-     return True
+  #Something in common or all equal
+  if len(result)>0:
+     return "Similar"
 
-  return False   
+  return "False"   
 
 #1) First criteria: EXACT MATCH
-def __ExactMatch(my_query, rules,query_activity_t3,query_activity_t2,query_activity_t1):
+def __ExactMatch(rules,query_activity):
  for rule in rules:
      rule_antecedent=__ruleAntecedent(rule)
+     activity=__splitActivity(rule_antecedent)
      
-     activity_t3,activity_t2,activity_t1=__splitActivity(rule_antecedent)
-
-     if activity_t3==query_activity_t3 and activity_t2==query_activity_t2 and activity_t1==query_activity_t1:
+     #in my query there isn't activity in t0, so i put the same activity to facilate equality
+     query_activity[0]=activity[0]
+     if activity==query_activity:
       return "EXACT MATCH",rule
  return 'NULL','NULL'
 
 #2) Second criteria: MATCH
-def __Match(rules,query_activity_t3,query_activity_t2,query_activity_t1):
+def __Match(rules,query_activity):
  for rule in rules:
      rule_antecedent=__ruleAntecedent(rule)
 
-    #Obtain activity for day in generated rules
-     activity_t3,activity_t2,activity_t1=__splitActivity(rule_antecedent)
+     #Obtain activity for day in generated rules
+     activity=__splitActivity(rule_antecedent)
+     query_activity[0]=activity[0]
 
-   #check if query rule (user) is a subset of rule generated from algorithm
-     if set(activity_t3).issubset(query_activity_t3) and set(activity_t2).issubset(query_activity_t2) and set(activity_t1).issubset(query_activity_t1):
-         return "MATCH",rule
- return 'NULL','NULL'
+     #check if rule generated from algorithm is a subset of query(user) rule
+     subset=True
+     
+     #Find the index when activity are not null
+     activityIndexNotNull = list(filter(lambda x: activity[x] != [], range(len(activity))))
+     query_activityIndexNotNull = list(filter(lambda x: query_activity[x] != [], range(len(query_activity))))
+
+    #Two rules must be the same temporal window and have activity in same time
+     if(len(activity)!=len(query_activity) and activityIndexNotNull==query_activityIndexNotNull):
+         subset=False
+     else:
+      for i in range(len(activity)) :
+         if(not set(activity[i]).issubset(query_activity[i]) and activity[i]):
+             subset= False
+     if subset:  
+      return "MATCH",rule
+ return 'NULL','NULL'     
 
 #3) Third criteria: PARTIAL MATCH
-def __PartialMatch(rules,query_activity_t3,query_activity_t2,query_activity_t1):
+def __PartialMatch(rules,query_activity):
  for rule in rules:
      rule_antecedent=__ruleAntecedent(rule)
 
-    #Obtain activity for day in generated rules
-     activity_t3,activity_t2,activity_t1=__splitActivity(rule_antecedent)
+     #Obtain activity for day in generated rules
+     activity=__splitActivity(rule_antecedent)
      
-     # Rule generated
-     activity_not_similar=[]
-     activity_possible_similar=[activity_t3,activity_t2,activity_t1]
+     #in my query there isn't activity in t0, so i put the same activity to facilate equality
+     query_activity[0]=activity[0]
+     
+     #Find the index when activity are not null
+     activityIndexNotNull = list(filter(lambda x: activity[x] != [], range(len(activity))))
+     query_activityIndexNotNull = list(filter(lambda x: query_activity[x] != [], range(len(query_activity))))
 
-     # Query rule
-     query_not_similar=[]
-     query_possible_similar=[query_activity_t3,query_activity_t2,query_activity_t1]
+     #Two rules must be the same temporal window activity and have activity in same time
+     if (len(activity)!=len(query_activity) or activityIndexNotNull!=query_activityIndexNotNull):
+         continue
 
-    #Not similar list means MATCH
-     if set(activity_t3).issubset(query_activity_t3) and activity_t3 and query_activity_t3:
-        activity_not_similar.append(activity_t3)
-        query_not_similar.append(query_activity_t3)
-     if set(activity_t2).issubset(query_activity_t2) and activity_t2 and query_activity_t2:
-        activity_not_similar.append(activity_t2)
-        query_not_similar.append(query_activity_t2)
-     if set(activity_t1).issubset(query_activity_t1) and activity_t1 and query_activity_t1:
-        activity_not_similar.append(activity_t1)
-        query_not_similar.append(query_activity_t1)
-    
-    # List of possible similar
-     activity_possible_similar=[item for item in activity_possible_similar if not item in activity_not_similar]
-     query_possible_similar=[item for item in query_possible_similar if not item in query_not_similar]
-   
-    #Check if all activity in possible_similar is similar 
-     similar=True
-     for i in range(len(activity_possible_similar)):
-         if(not __isSimilar(activity_possible_similar[i],query_possible_similar[i])):
-             similar=False
-     if(similar and len(activity_possible_similar)<3 and len(activity_not_similar)>0):
-         return "PARTIAL MATCH",rule
-     #All activity in t3,t2,t1 are similar
-     elif similar:
+     #Save similarity of all activity 
+     resultSimilar=[]
+     for i in range(1,len(activity)):
+      resultSimilar.append(__isSimilar(activity[i],query_activity[i]))
+
+     #Some similar and some equal but at least one Partial
+     if(all(x == 'Similar' or x=='Partial' for x in resultSimilar) and 'Partial' in resultSimilar):
+      return "PARTIAL MATCH", rule
+  
+ return 'NULL','NULL'
+
+#4) Fourth criteria: SIMILAR MATCH
+def __SimilarMatch(rules,query_activity):
+ for rule in rules:
+     rule_antecedent=__ruleAntecedent(rule)
+
+     #Obtain activity for day in generated rules
+     activity=__splitActivity(rule_antecedent)
+     
+     #in my query there isn't activity in t0, so i put the same activity to facilate equality
+     query_activity[0]=activity[0]
+     
+     #Find the index when activity are not null
+     activityIndexNotNull = list(filter(lambda x: activity[x] != [], range(len(activity))))
+     query_activityIndexNotNull = list(filter(lambda x: query_activity[x] != [], range(len(query_activity))))
+
+     #Two rules must be the same temporal window activity and have activity in same time
+     if (len(activity)!=len(query_activity) or activityIndexNotNull!=query_activityIndexNotNull):
+         continue
+
+     #Save similarity of all activity 
+     resultSimilar=[]
+     for i in range(1,len(activity)):
+      resultSimilar.append(__isSimilar(activity[i],query_activity[i]))
+     
+     #All similar
+     if(all(x == 'Similar' for x in resultSimilar)):
       return "SIMILAR MATCH", rule
   
  return 'NULL','NULL'
@@ -248,26 +293,31 @@ def __findMatching(my_query, rules,filterT0):
  my_query=my_query.replace(" ","")
  
  #obtaing activity from query
- query_activity_t3,query_activity_t2,query_activity_t1=__splitActivity(my_query)
+ query_activity=__splitActivity(my_query)
 
  #Take only rule with t0 in antecedent
  if filterT0=="on":
   rules = list(filter(lambda rule: "t0" in __ruleAntecedent(rule),rules))
 
  #1) EXACT MATCH result
- message,rule=__ExactMatch(my_query, rules,query_activity_t3,query_activity_t2,query_activity_t1)
+ message,rule=__ExactMatch(rules,query_activity)
  if message!="NULL":
      return message,rule
 
  #2) MATCH result
- message,rule=__Match(rules,query_activity_t3,query_activity_t2,query_activity_t1)
+ message,rule=__Match(rules,query_activity)
  if message!="NULL":
      return message,rule
  
  #3) PARTIAL MATCH result
- message,rule=__PartialMatch(rules,query_activity_t3,query_activity_t2,query_activity_t1)
+ message,rule=__PartialMatch(rules,query_activity)
  if message!="NULL":
      return message,rule
-     
+
+ #4) SIMILAR MATCH result
+ message,rule=__SimilarMatch(rules,query_activity)
+ if message!="NULL":
+     return message,rule
+
  return "NO RULES FOUND", "NULL"
    
