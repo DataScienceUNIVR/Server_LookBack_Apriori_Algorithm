@@ -168,23 +168,21 @@ def __isSimilar(activity,query_activity):
   r_activity=list(set(activity) - set(query_activity))
   result=r_query_activity[:]
 
+  #Find if for every element in my query there's something similar in matching rule
   for elemQuery in r_query_activity:
-      deletable=True
+      nothingSimilar=True
       for elemActivity in r_activity:
          if  ("HA" in elemActivity and "HA" in elemQuery or
          "MA" in elemActivity and "MA" in elemQuery or
          "LA" in elemActivity and "LA" in elemQuery or
          "R" in elemActivity and "R" in elemQuery or
          "ZL" in elemActivity and "ZL" in elemQuery):
-          deletable=False
-      if(deletable):
-        result.remove(elemQuery) 
+          nothingSimilar=False
+      if(nothingSimilar):
+        return "False"
  
   #Something in common or all equal
-  if len(result)>0:
-     return "Similar"
-
-  return "False"   
+  return "Similar"   
 
 #1) First criteria: EXACT MATCH
 def __ExactMatch(rules,query_activity):
@@ -206,23 +204,19 @@ def __Match(rules,query_activity):
      #Obtain activity for day in generated rules
      activity=__splitActivity(rule_antecedent)
      query_activity[0]=activity[0]
-
-     #check if rule generated from algorithm is a subset of query(user) rule
-     subset=True
-     
+ 
      #Find the index when activity are not null
      activityIndexNotNull = list(filter(lambda x: activity[x] != [], range(len(activity))))
      query_activityIndexNotNull = list(filter(lambda x: query_activity[x] != [], range(len(query_activity))))
 
     #Two rules must be the same temporal window and have activity in same time
-     if(len(activity)!=len(query_activity) and activityIndexNotNull==query_activityIndexNotNull):
-         subset=False
-     else:
+     if(len(activity)==len(query_activity) and activityIndexNotNull==query_activityIndexNotNull):
+      subset=True
       for i in range(len(activity)) :
          if(not set(activity[i]).issubset(query_activity[i]) and activity[i]):
              subset= False
-     if subset:  
-      return "MATCH",rule
+      if subset:  
+       return "MATCH",rule
  return 'NULL','NULL'     
 
 #3) Third criteria: PARTIAL MATCH
