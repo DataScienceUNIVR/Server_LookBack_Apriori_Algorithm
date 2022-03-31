@@ -1,28 +1,8 @@
-#https://python-adv-web-apps.readthedocs.io/en/latest/flask_forms.html
-#https://github.com/macloo/python-adv-web-apps/tree/master/python_code_examples/flask/actors_app/templates
-
-#Lista di tutti i form presenti
-#https://github.com/macloo/python-adv-web-apps/blob/master/python_code_examples/flask/forms/WTForms-field-types.csv
-
-#Ereditarietà jinja flask
-#https://jinja.palletsprojects.com/en/3.0.x/templates/
-
-
-from asyncore import write
-from email.policy import default
-from select import select
-from tokenize import String
-from wsgiref.validate import validator
 import LookBack_Apriori_Algorithm
 import utilities
-import json
-from flask import Flask, make_response, render_template, redirect, url_for,request
+from flask import Flask, render_template, redirect, url_for,request
 from flask_bootstrap import Bootstrap
-from turtle import onclick, position
-from tkinter import Tk, filedialog
-from flask_sqlalchemy import SQLAlchemy
-from datetime import datetime
-from sqlalchemy.ext.hybrid import hybrid_property
+import os.path
 app = Flask(__name__)
 
 # Flask-WTF requires an enryption key - the string can be anything
@@ -31,14 +11,23 @@ app.config['SECRET_KEY'] = 'C2HWGVoMGfNTBsrYQg8EcMrdTimkZfAb'
 # Flask-Bootstrap requires this line
 Bootstrap(app)
 
-
 # all Flask routes below
-@app.route('/')
-def index():
-    return render_template('index.html')
+
+@app.route('/', methods=["POST","GET"])
+def matchQueryForm():
+    #check if file with rule exist
+    if os.path.exists("setting.txt"):
+     temporal_window,_,_,_,rules,_=utilities.__splitFile()
+     return render_template('matchQueryForm.html',rules=rules,temporal_window=temporal_window) 
+    else: 
+     return render_template('settingRules.html')
+
+@app.route('/settingRules')
+def settingRules():
+    return render_template('settingRules.html')
  
-@app.route('/algorithm', methods=["POST","GET"])
-def algorithm():  
+@app.route('/rulesGeneration', methods=["POST","GET"])
+def rulesGeneration():  
  if request.method=="POST":
   data=request.form.get('data_select')
   sleep_value= request.form.get("sleep_value")
@@ -72,24 +61,19 @@ def algorithm():
      #save info in a file
      utilities.__saveSetting(sleep_value,temporal_window,min_support,min_confidence,rules)
  
-     return render_template("algorithm.html", sleep_value=sleep_value,
+     return render_template("rulesGeneration.html", sleep_value=sleep_value,
      temporal_window=temporal_window,min_support=min_support,min_confidence=min_confidence,
      rules=rules,len_rules=len_rules)
   else:
-      return render_template("index.html",message=message)
+      return render_template("settingRules.html",message=message)
  
  elif request.method=="GET":
        temporal_window,sleep_value,min_support,min_confidence,_,rules=utilities.__splitFile()
-       return render_template("algorithm.html", sleep_value=sleep_value,
+       return render_template("rulesGeneration.html", sleep_value=sleep_value,
        temporal_window=temporal_window,min_support=min_support,min_confidence=min_confidence,
        rules=rules,len_rules=len(rules))
 
-@app.route('/algorithm/matchQueryForm', methods=["POST","GET"])
-def matchQueryForm():
-    temporal_window,_,_,_,rules,_=utilities.__splitFile()
-    return render_template('matchQueryForm.html',rules=rules,temporal_window=temporal_window) 
-
-@app.route('/algorithm/matchQueryForm/matchingQuery', methods=["POST","GET"])
+@app.route('/matchingQuery', methods=["POST","GET"])
 def matchingQuery():
     temporal_window,_,_,_,rules,_=utilities.__splitFile()
     temporal_window=int(temporal_window)
