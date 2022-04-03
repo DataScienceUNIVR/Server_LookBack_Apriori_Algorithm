@@ -1,6 +1,12 @@
 from argparse import Action
+from dataclasses import field
 from operator import itemgetter
 import re
+import os.path
+from os import walk
+
+# ---- CHECK FUNCTION ----
+
 # function to return error message about form in index
 def __dataRange(sleep_value,temporal_window,min_support,min_confidence):
     error=""
@@ -51,6 +57,9 @@ def __isQueryValid(temporal_window,my_query):
 
     return True,"Query correct!"
 
+
+# ----UTILITIES FUNCTION -----
+
 # sorting rules from all rules
 def __rulesSorting(rules,temporal_window):
     __addCriteria(rules,temporal_window)
@@ -72,9 +81,9 @@ def __addCriteria(rules,temporal_window):
     return rules
   
 # from a file return setting and a list of rules
-def __splitFile():
+def __splitFile(filename):
     rules=""
-    with open('setting.txt','r') as f:
+    with open('Setting/'+filename,'r') as f:
         res=f.read()
 
     temporal_window,sleep_value,min_support,min_confidence=list((res[:res.index('\n')]).split(','))
@@ -102,14 +111,28 @@ def __splitFile():
     
     return temporal_window,sleep_value,min_support,min_confidence,onlyRules,mylistRules
 
+#check if the setting already exist in a setting file
+def __alreadySetting(filename):
+ return os.path.exists('Setting/'+filename)
+
+#check if a set of rules is implicit generation from another set of rule [EX: min_confidence=0.2 containg min_conf=0.4,0.6,0.8,0.1 or support]
+def __rulesImplicitGeneration(data,sleep_value,temporal_window,min_support,min_confidence):
+ filenames = next(walk('Setting/'), (None, None, []))[2]
+ for file in filenames:
+     info=re.split(',',file)
+     if 'Data/'+info[0]==data and int(info[1])==sleep_value and int(info[2])==temporal_window and float(info[3]) ==min_support and float(info[4])<min_confidence:
+      return file
+     elif 'Data/'+info[0]==data and int(info[1])==sleep_value and int(info[2])==temporal_window and float(info[3]) <min_support and float(info[4])==min_confidence:
+      return file
+ return "NULL"
 #create a file_name file to save mining rules and setting
-def __saveSetting(sleep_value,temporal_window,min_support,min_confidence,rules):
+def __saveSetting(rules,filename,temporal_window,sleep_value,min_support,min_confidence):
  
  #obtain only the rule(the string)
  #only_rule=(x['rule'] for x in rules)
        
  #save information in a file
- with open('setting.txt','w') as f:
+ with open('Setting/'+filename,'w') as f:
   f.write(str(temporal_window)+',')
   f.write(str(sleep_value)+',')
   f.write(str(min_support)+',')
@@ -117,7 +140,7 @@ def __saveSetting(sleep_value,temporal_window,min_support,min_confidence,rules):
   for e in rules:
    f.write(e['rule']+','+str(e['confidence'])+','+str(e['support'])+','+str(e['completeness'])+','+str(e['size'])+'\n')
 
-#from a rule return activity_t1, actvity_t2, activity_t3
+#from a rule return activity in order t0,t1,t2,...
 def __splitActivity(rule):
 
     rule=rule.replace("+", ",")       #use this because split with + has a bug
@@ -149,6 +172,10 @@ def __ruleAntecedent(rule):
     #delete all white space
     rule_antecedent=rule_antecedent.replace(" ", "")  
     return rule_antecedent
+
+
+
+# ----- MATCHING FUNCTION -----
 
 # check if two activity are similar if they have same type [HA_3_t2,MA_1_t2] and [HA_2_t2]
 def __isSimilar(activity,query_activity):
