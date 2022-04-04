@@ -1,2 +1,9 @@
 # created by virtualenv automatically
 Data/
+css/
+include/
+js/
+Lib/
+Scripts/
+share/
+_pycache_
