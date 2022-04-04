@@ -202,4 +202,4 @@ def run(path,sleep_value, temporal_window=2, min_support=0.02, min_confidence=0)
  #sort rules
  rules=utilities.__rulesSorting(rules,temporal_window)
 
- return rules,len(rules) 
+ return rules

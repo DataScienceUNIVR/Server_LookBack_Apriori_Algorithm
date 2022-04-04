@@ -115,16 +115,15 @@ def __splitFile(filename):
 def __alreadySetting(filename):
  return os.path.exists('Setting/'+filename)
 
-#check if a set of rules is implicit generation from another set of rule [EX: min_confidence=0.2 containg min_conf=0.4,0.6,0.8,0.1 or support]
+#check if a set of rules is implicit generation from another set of rule (file existing) [EX: min_confidence=0.2 containg min_conf=0.4,0.6,0.8,0.1 or support]
 def __rulesImplicitGeneration(data,sleep_value,temporal_window,min_support,min_confidence):
  filenames = next(walk('Setting/'), (None, None, []))[2]
  for file in filenames:
      info=re.split(',',file)
-     if 'Data/'+info[0]==data and int(info[1])==sleep_value and int(info[2])==temporal_window and float(info[3]) ==min_support and float(info[4])<min_confidence:
-      return file
-     elif 'Data/'+info[0]==data and int(info[1])==sleep_value and int(info[2])==temporal_window and float(info[3]) <min_support and float(info[4])==min_confidence:
+     if info[0]==data and int(info[1])==sleep_value and int(info[2])==temporal_window and float(info[3]) <=min_support and float(info[4])<=min_confidence:
       return file
  return "NULL"
+
 #create a file_name file to save mining rules and setting
 def __saveSetting(rules,filename,temporal_window,sleep_value,min_support,min_confidence):
  
@@ -173,6 +172,16 @@ def __ruleAntecedent(rule):
     rule_antecedent=rule_antecedent.replace(" ", "")  
     return rule_antecedent
 
+#Return a new set of rule from rules with all rule with min_support and min_confidence
+def __takeRuleImplicit(rules,min_support,min_confidence):
+    res=[]
+    for rule in rules:
+     if float(rule['support']) >= min_support and float(rule['confidence']) >= min_confidence:
+      res.append(rule)
+      rules=res
+
+    onlyRules = [ sub['rule'] for sub in rules ]
+    return onlyRules,rules
 
 
 # ----- MATCHING FUNCTION -----
