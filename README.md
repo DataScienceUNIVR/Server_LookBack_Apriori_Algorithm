@@ -1,5 +1,5 @@
 
-# ðŸŒ  LookBack Apriori Algorithm
+# 🌠 LookBack Apriori Algorithm
 This is a flask app developed in order to manage data and through LookBack Apriori Algorithm creates a set of rules to match a user query.
 
 
@@ -8,10 +8,10 @@ The application is based on LAL, this algorithm is an extension with time of cla
 It's a data mining techniques to analyze big datasets.
 We simulate that the data (Data/) coming from fitbit.
 
-### ðŸš€ Future implementation
+### 🚀 Future implementation
 This project represents the server and in the future it will connected through API with Database and mobile Application.
 
-### ðŸ Technologies used
+### 🐍 Technologies used
 To develop application i used VisualStudio code and powershell integrated.
 The language to handle data and creates algorithm is Python.
 
@@ -20,7 +20,7 @@ I used a Flask because it's a Python module that lets me develop web application
 Web App pages are based on Bootstrap a front-end framework used to create modern websites and web apps.
 It's open-source and free to use, yet features numerous HTML and CSS templates for UI interface elements.
 
-## âš ï¸ Installation and Run the Project
+## ⚠️ Installation and Run the Project
 ### Configuration
 - Clone the project
 ```
@@ -28,7 +28,6 @@ It's open-source and free to use, yet features numerous HTML and CSS templates f
   ```
 - Create a virtual enviroment
 - Put the project in venv
-- Create folder 'Data' in venv and put in it fitbit data named pm1,pm2,pm3,pm4
 - Activate venv:
    
    ```
@@ -51,17 +50,18 @@ It's open-source and free to use, yet features numerous HTML and CSS templates f
 
 3- Open http://127.0.0.1:5000/
 
-### âš¡ Usage
-#### Use case diagram
-![](images/UseCase.jpg)
+## ⚡ Usage
+### Use case diagram
+<img src="images/UseCase.jpg" >
 - Settings page: compile form with setting in order to generate rules
-![](images/form1.jpg)
+### The pages
+<img src="images/form1.jpg" >
 - Rules generated
-![](images/form2.jpg)
+<img src="images/form2.jpg" >
 - MatchQuery: insert a query for matching
-![](images/form3.jpg)
+<img src="images/form3.jpg" >
 - Result of matching
-![](images/form4.jpg)
+<img src="images/form4.jpg" >
 
 
 ## Authors
