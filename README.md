@@ -51,16 +51,15 @@ It's open-source and free to use, yet features numerous HTML and CSS templates f
 3- Open http://127.0.0.1:5000/
 
 ## ⚡ Usage
-### Use case diagram
+### Use case diagram and pages
 <img src="images/UseCase.jpg" width="400" height="200" >
-- Settings page: compile form with setting in order to generate rules
-### The pages
+ Settings page: compile form with setting in order to generate rules
 <img src="images/form1.jpg" width="400" height="300" >
-- Rules generated
+ Rules generated
 <img src="images/form2.jpg" width="470" height="300">
-- MatchQuery: insert a query for matching
+ MatchQuery: insert a query for matching
 <img src="images/form3.jpg" width="400" height="300">
-- Result of matching
+ Result of matching
 <img src="images/form4.jpg" width="400" height="100" >
 
 
