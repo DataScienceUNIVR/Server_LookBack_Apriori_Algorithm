@@ -1,9 +1,8 @@
 # created by virtualenv automatically
-Data/
+_pycache_/
 css/
 include/
 js/
 Lib/
 Scripts/
 share/
-_pycache_
