@@ -52,20 +52,20 @@ It's open-source and free to use, yet features numerous HTML and CSS templates f
 
 ## ⚡ Usage
 ### Use case diagram
-<img src="images/UseCase.jpg" >
+<img src="images/UseCase.jpg" width="400" height="200" >
 - Settings page: compile form with setting in order to generate rules
 ### The pages
-<img src="images/form1.jpg" >
+<img src="images/form1.jpg" width="400" height="300" >
 - Rules generated
-<img src="images/form2.jpg" >
+<img src="images/form2.jpg" width="470" height="300">
 - MatchQuery: insert a query for matching
-<img src="images/form3.jpg" >
+<img src="images/form3.jpg" width="400" height="300">
 - Result of matching
-<img src="images/form4.jpg" >
+<img src="images/form4.jpg" width="400" height="100" >
 
 
 ## Authors
 
-- ðŸ‡®ðŸ‡¹ [@MarcoCastelli](https://github.com/MarcoCastelli4)
+- 🇮🇹 [@MarcoCastelli](https://github.com/MarcoCastelli4)
 - [![linkedin](https://img.shields.io/badge/linkedin-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://it.linkedin.com/in/marco-castelli-65643b203)
 
