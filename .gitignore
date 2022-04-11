@@ -6,3 +6,5 @@ js/
 Lib/
 Scripts/
 share/
+.gitattributes
+pyvenv.cfg
