@@ -50,7 +50,7 @@ It's open-source and free to use, yet features numerous HTML and CSS templates f
 
 3- Open http://127.0.0.1:5000/
 
-## ⚡ Usage
+## ⚡ Front-End Usage
 ### Use case diagram and pages
 <img src="images/UseCase.jpg" width="400" height="200" >
  Settings page: compile form with setting in order to generate rules
@@ -61,6 +61,14 @@ It's open-source and free to use, yet features numerous HTML and CSS templates f
 <img src="images/form3.jpg" width="400" height="300">
  Result of matching
 <img src="images/form4.jpg" width="400" height="100" >
+
+## ⚡API Usage
+Developers usage: A IONIC app send api request to a server, it will answer with JSON object and app handle data.
+
+Testing usage: You can use simply https://www.postman.com/ to send API request to server, it will response with a JSON object.
+Postman is very intuitive but see doc\relazione Chapter 5.2-3 to know api format, api response and how to use Postman
+
+
 
 
 ## Authors

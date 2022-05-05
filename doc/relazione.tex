@@ -32,7 +32,7 @@ L'algoritmo è un estensione del classico Algoritmo Apriori, infatti effettua un
 Queste regole vengono generate in base ai dati del singolo utente e rappresentano quali attività l'utente dovrebbe svolgere per ottenere un buon riposo.
 
 \section{Organizzazione del codice}
-Il file principale è <<app.py>> che rappresenta la routes delle varie pagine html, in esso vengono richiamate le varie funzioni per gestire i dati ottenuti dai form.
+Il file principale è <<app.py>> che rappresenta la routes delle varie pagine html, in esso vengono richiamate le varie funzioni per gestire i dati ottenuti dai form oppure i dati provenienti dalle api.
 
 Tutte le funzioni utilizzate sono state organizzate in un file <<utilities.py>> mentre l'algoritmo di data mining, ossia <<LookBack Apriori Algorithm>>, è definito in un file a parte .
 
@@ -45,22 +45,38 @@ Nella cartella <<Data>> sono presenti delle sottocartelle che contengono i dati 
 \section{Descrizione file principali}
 \subsection{<<app.py>>}
 In un certo modo rappresenta il main del nostro programma.
+
+Questo file permette di gestire sia i dati provenienti dai form (Front-end), sia quelli provenienti dalle api inviate dall'applicazione.
+Per differenziare la tipologia di richiesta, viene utilizzata la variabile <<api>>, essa vale True se la richiesta è una api mentre False altrimenti. 
+
+In questo modo controllando il suo valore, so se restituire una pagina.html oppure richiamare un'altra funzione per poi restituire un oggetto json, ossia la risposta alla api.
+
+
+\emph{Di seguito la descrizione mediante l'uso del front-end. Per le richieste api il funzionamento è lo stesso ma, al posto di richiamare la pagina html richiamo direttamente la funzione}
+
+
 Prima delle <<routes>> vengono dichiarate tutte le librerie  utilizzate e dopodichè vengono definite delle variabili globali in modo che siano accessibili all'interno delle varie routes.
 
+\begin{enumerate}
+\item
 La prima route è <<settingRules>> in cui viene semplicemente richiamata la pagina <<settingRules.html>>, in questa pagina html si compila il form con le informazioni per il setting: dataset , sleep value, temporal window, min support, min confidence. 
 
+\item
 Dopo aver compilato il form i dati vengono passatti alla route <<rulesGeneration>>, qui vengono effettuati vari controlli sulla correttezza dei dati, qualora non lo fossero l'utente viene reindirizzatto alla pagina <<settingRules.html>>. Se invece i dati fossero corretti si verifica se è già presente un file con quei  setting, in modo da non dover rigenerare le regole, se non lo fosse, si controlla anche se è possibile generare le regole a partire da un file già presente ma con diversi setting.
 
  Se non è vero nessuno dei due casi precedenti allora, bisogna necessariamente  richiamare la funzione di generazione delle regole <<LookBack Apriori Algorithm.py>> che restituisce una lista formata dalle regole generate, già ordinate e successivamente si salvano le regole su un file all'interno della cartella <<Setting>>.
 
+\item
 Avvenuta la generazione delle regole si viene reindirizzati alla pagina <<rulesGeneration.html>> che mostra le prime venti regole generate, ordinate per support, completezza e dimensione; vengono inoltre mostrati i setting utilizzati e il numero totale delle regole generate.
 
 Nella navbar è presente la voce <<Match Query>>, una volta premuta, si viene reindirizzati alla pagina <<matchQueryForm.html>> dove l'utente ha la possibilià di inserire una query per il matching.
 
+\item
 Inserita la query e premuto l'apposito bottone si viene reindirizzatti alla route <<matchingQuery>>, qui viene controllata la correttezza della query e successivamente viene richiamata la funzione di matching che mostra il risultato all'interno della pagina <<matchingQuery.html>>.
 
 L'utente ha sempre a disposizione la navbar che può utilizzare per tornare a visualizzare le regole generate oppure per creare nuove regole con nuovi setting.
 
+\end{enumerate}
 \subsection{<<LookBack Apriori Algorithm.py>>}
 Il codice dell'algoritmo è stato messo sotto forma di funzione, il setting viene passato come parametro alla funzione e tali parametri vengono utilizzato dall'algoritmo per generare le regole secondo onerosi calcoli.
 Viene richiamata la funzione di ordinamento sulle regole ed infine vengono restituite tutte le regole generate.
@@ -185,7 +201,97 @@ Consente di ottenere l'antecedente della regola cioè tutto ciò prima di '->', 
 Viene utilizzata per il matching delle regole.
 
 
+\section{Api}
+\subsection{Introduzione}
+Per rendere il server completo per il suo funzionamento, lo si ha integrato per gestire anche richieste api.
 
+Queste richieste provengono da un'app sul telefono e specificano i parametri di setting e la query, ossia i medesimi parametri inseribili da front-end.
+
+Il server è in grado di sapere grazie alla variabile global <<api>> se i dati provengono da un api oppure da front-end. Nel primo caso risponderà tramite un oggetto json nel secondo, restituirà una pagina html.
+\subsection{Struttura api e formato risposta}
+\subsubsection{Richiesta api}
+La richiesta api viene inviata tramite POST e il suo body è formato da un oggetto JSON così definito:
+
+\{
+   
+ "data": "pm1",
+
+    "sleep\_value":3,
+
+    "temporal\_window":2,
+
+    "min\_confidence":1.0,
+
+    "min\_support":0.03,
+
+    "my\_query":"HA\_3\_t2 + MA\_3\_t1 + R\_1\_t1",
+
+    "filterT0":"on"
+
+\}
+
+Tutti i significati delle variabili sono facilmente intuibili. <<filterT0>> può assumente valore <<on,off>> e consente di fare il matching con regole che hanno attività in t0 oppure no.
+
+\subsubsection{Risposta api}
+La risposta invece ha il seguente formato JSON:
+
+\{
+
+"description": "", 
+
+"typeMatch": "", 
+
+"ruleMatch": ""
+
+\}
+
+<<description>> assume valore <<correct>> se non ci sono stati errori di formato nella richiesta api, altrimenti contiene un messaggio che specifica qual'è errore.
+
+<<typeMatch>> assume valore solo se description è <<correct>>, specifica qual'è il matching trovato per la query scritta nella api (es: EXACT\_MATCH, PARTIAL\_MATCH,...)
+
+<<ruleMatch>> assume valore solo se description è <<correct>>, specifica qual'è la regola trovata nel matching con la query scritta nella api.
+
+
+Esempi di risposte:
+\begin{itemize}
+\item Richiesta api corretta ma query inserita non trova matching:
+
+\{"description": "correct", "typeMatch": "NO RULES FOUND", "ruleMatch": "NULL"\} 
+
+\item Richiesta api corretta e query inserita  trova matching:
+
+\{"description": "correct", "typeMatch": "EXACT MATCH", "ruleMatch": "HA\_2\_t2 + R\_2\_t2 + LA\_3\_t1 + R\_3\_t0 -> ZL\_3\_t0"\}
+
+\item Richiesta api errata:
+
+\{"description": "Query has not valid activity!", "typeMatch": "", "ruleMatch": ""\}
+
+\end{itemize}
+
+\subsection{Modalità di utilizzo}
+
+\begin{itemize}
+\item Uso definitivo:
+
+L'applicazione sviluppata crea delle richieste api, con il formato definito precedentemente e le invia all'indirizzo: \emph{https://lookbackapriorialgorithm.herokuapp.com/}.
+
+\item Testing:
+
+ Tramite Postman al medesimo indirizzo, Postman è una piattaforma API per gli sviluppatori per progettare, creare, testare e iterare le API.
+
+Passaggi:
+\begin{enumerate}
+\item Si crea una nuova HTTP request
+\item Si seleziona il metodo POST
+\item Si specifica il seguente URL \emph{https://lookbackapriorialgorithm.herokuapp.com/}
+\item Si clicca su body e si seleziona la voce <<raw>>
+\item Si clicca su <<text>> e si specifica JSON
+\item Nel form sottostante si inserisce la richiesta api
+\item Si invia la richiesta premendo su SEND
+
+\end{enumerate}
+
+\end{itemize}
 
 
 \end{document}
