@@ -1,12 +1,9 @@
-from fileinput import filename
-
-from sklearn.impute import SimpleImputer
 import LookBack_Apriori_Algorithm
 import utilities
-from flask import Flask, render_template, redirect, url_for,request
+from flask import Flask, render_template,request
 from flask_bootstrap import Bootstrap
-import os.path
 import json
+
 app = Flask(__name__)
 
 # Flask-WTF requires an enryption key - the string can be anything
@@ -195,6 +192,3 @@ def matchingQuery():
         result = {'description':'correct','typeMatch' : typeMatch, 'ruleMatch' : ruleMatch}
         return json.dumps(result)
 
-# keep this as is
-if __name__ == '__main__':
-    app.run(debug=True)
