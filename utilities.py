@@ -350,4 +350,4 @@ def __findMatching(my_query, rules,filterT0):
      return message,rule
 
  return "NO RULES FOUND", "NULL"
-   
+
