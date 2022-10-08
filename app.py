@@ -2,9 +2,11 @@ import LookBack_Apriori_Algorithm
 import utilities
 from flask import Flask, render_template,request
 from flask_bootstrap import Bootstrap
+from flask_cors import CORS
 import json
 
 app = Flask(__name__)
+CORS(app) # This will enable CORS for all routes
 
 # Flask-WTF requires an enryption key - the string can be anything
 app.config['SECRET_KEY'] = 'C2HWGVoMGfNTBsrYQg8EcMrdTimkZfAb'
